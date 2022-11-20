@@ -8,7 +8,7 @@ library(skimr)
 library(janitor)
 library(lubridate)
 
-# (Path Revision Needed) File read ----
+# (Path Revision Needed) dsx File read ----
 
 dsx <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/Demand Planning/Demand Planning Team/BI Forecast Backup/DSX Forecast Backup - 2022.11.14.xlsx")
 
@@ -27,6 +27,25 @@ dsx %>%
                   abc_4_id, safety_stock_id, mto_mts_gross_requirements_calc_method_id, adjusted_forecast_pounds_lbs, adjusted_forecast_cases,
                   stat_forecast_pounds_lbs, stat_forecast_cases, product_label_sku_code, primary_channel_id,
                   sub_segment_id) -> dsx
+
+
+
+# (Path Revision Needed) end_inv File read ----
+
+end_inv <- read_excel("C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 23/Forecast Accuracy and Bias/Sample report for me/Forecast Accuracy by Ship-Loc_(Example for New Metrics) for R.xlsx",
+                      sheet = "End Inv")
+
+
+end_inv[-1, ] -> end_inv
+colnames(end_inv) <- end_inv[1, ]
+end_inv[-1, ] -> end_inv
+
+end_inv %>% 
+  janitor::clean_names() %>% 
+  readr::type_convert() %>% 
+  dplyr::select(-ship_loc_2) %>% 
+  dplyr::mutate(sku = gsub("-", "", sku),
+                end_month = as.Date(end_month, origin = "1899-12-30"))
 
 
 
@@ -51,4 +70,15 @@ separate(dsx, product_label_sku_code, c("rm", "label"), sep = "-") %>%
   dplyr::select(-rm) -> dsx
 
   
+
+# Forecasted Month - Need to meet with Wilson for the logic
+
+
+# Forecast Per - Need to meet with Wilson for the logic
+
+# Lag - Need to meet with Wilson for the logic
+
+
+
+# Ending FG Inv
 
