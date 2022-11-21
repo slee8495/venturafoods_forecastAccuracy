@@ -229,7 +229,7 @@ end_inv %>%
 dsx %>% 
   dplyr::left_join(end_inv_pivot) -> dsx
 
-
+rm(end_inv)
 
 
 
