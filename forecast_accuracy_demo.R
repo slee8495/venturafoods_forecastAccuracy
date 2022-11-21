@@ -44,7 +44,7 @@ end_inv %>%
   readr::type_convert() %>% 
   dplyr::select(-ship_loc_2) %>% 
   dplyr::mutate(sku = gsub("-", "", sku),
-                end_month = as.Date(end_month, origin = "1899-12-30"))
+                end_month = as.Date(end_month, origin = "1899-12-30")) -> end_inv
 
 
 ########################## Lag 0 
@@ -90,8 +90,8 @@ dsx_lag_0 %>%
 
 # Forcast per 
 dsx_lag_0 %>% 
-  dplyr::mutate(forecast_per_lag = lubridate::floor_date(Sys.Date(), unit = "month") -1,
-                forecast_per_lag = lubridate::floor_date(forecast_per_lag,  unit = "month")) -> dsx_lag_0
+  dplyr::mutate(forecast_per = lubridate::floor_date(Sys.Date(), unit = "month") -1,
+                forecast_per = lubridate::floor_date(forecast_per,  unit = "month")) -> dsx_lag_0
 
 # Lag
 dsx_lag_0 %>% 
@@ -141,8 +141,8 @@ dsx_lag_1 %>%
 
 # Forcast per 
 dsx_lag_1 %>% 
-  dplyr::mutate(forecast_per_lag = lubridate::floor_date(Sys.Date(), unit = "month") -1,
-                forecast_per_lag = lubridate::floor_date(forecast_per_lag,  unit = "month")) -> dsx_lag_1
+  dplyr::mutate(forecast_per = lubridate::floor_date(Sys.Date(), unit = "month") -1,
+                forecast_per = lubridate::floor_date(forecast_per,  unit = "month")) -> dsx_lag_1
 
 # Lag
 dsx_lag_1 %>% 
@@ -193,8 +193,8 @@ dsx_lag_2 %>%
 
 # Forcast per 
 dsx_lag_2 %>% 
-  dplyr::mutate(forecast_per_lag = lubridate::floor_date(Sys.Date(), unit = "month") -1,
-                forecast_per_lag = lubridate::floor_date(forecast_per_lag,  unit = "month")) -> dsx_lag_2
+  dplyr::mutate(forecast_per = lubridate::floor_date(Sys.Date(), unit = "month") -1,
+                forecast_per = lubridate::floor_date(forecast_per,  unit = "month")) -> dsx_lag_2
 
 # Lag
 dsx_lag_2 %>% 
@@ -213,6 +213,23 @@ rm(dsx_lag_0, dsx_lag_1, dsx_lag_2)
 ################################################ dsx calculation part ################################################
 
 # Ending FG Inventory
+# ref
+
+dsx %>% 
+  dplyr::mutate(ref = paste0(location_no, "_", product_label_sku_code, "_", forecast_per)) -> dsx
+
+end_inv %>% 
+  dplyr::mutate(ref = paste0(ship_loc, "_", sku, "_", end_month)) -> end_inv
+
+end_inv %>% 
+  dplyr::group_by(ref) %>% 
+  dplyr::summarise(ending_fg_inv = sum(ending_inv)) -> end_inv_pivot
+
+
+dsx %>% 
+  dplyr::left_join(end_inv_pivot) -> dsx
+
+
 
 
 
