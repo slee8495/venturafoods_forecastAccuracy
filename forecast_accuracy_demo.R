@@ -11,21 +11,17 @@ library(lubridate)
 ########################################### Original Resources Input ###############################################
 # (Path Revision Needed) dsx File read ----
 # Lag 0
-dsx_lag_0 <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/Demand Planning/Demand Planning Team/BI Forecast Backup/2022/DSX Forecast Backup - 2022.11.01.xlsx")
+dsx_lag_0 <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/Demand Planning/Demand Planning Team/BI Forecast Backup/2022/DSX Forecast Backup - 2022.10.03.xlsx")
 
 # Lag 1
-dsx_lag_1 <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/Demand Planning/Demand Planning Team/BI Forecast Backup/2022/DSX Forecast Backup - 2022.10.03.xlsx")
+dsx_lag_1 <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/Demand Planning/Demand Planning Team/BI Forecast Backup/2022/DSX Forecast Backup - 2022.09.02.xlsx")
 
 # Lag 2
-dsx_lag_2 <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/Demand Planning/Demand Planning Team/BI Forecast Backup/2022/DSX Forecast Backup - 2022.09.02.xlsx")
+dsx_lag_2 <- read_excel("S:/Global Shared Folders/Large Documents/S&OP/Demand Planning/Demand Planning Team/BI Forecast Backup/2022/DSX Forecast Backup - 2022.08.01.xlsx")
 
 
-
-# Ending Inventory
-end_inv <- read_excel("C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 23/Forecast Accuracy and Bias/Sample report for me/Forecast Accuracy by Ship-Loc_(Example for New Metrics) for R.xlsx",
-                      sheet = "End Inv")
-
-
+# https://edgeanalytics.venturafoods.com/MicroStrategy/servlet/mstrWeb?evt=3186&src=mstrWeb.3186&subscriptionID=A0C9BDC98545BD83C168548B86BC3B28&Server=ENV-268038LAIO1USE2&Project=VF%20Intelligent%20Enterprise&Port=39321&share=1
+actual_inv <- read_excel("C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 23/Forecast Accuracy and Bias/Sales History Analysis.xlsx")
 
 
 
@@ -35,16 +31,20 @@ end_inv <- read_excel("C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/P
 
 ########################## Ending Inventory
 
-end_inv[-1, ] -> end_inv
-colnames(end_inv) <- end_inv[1, ]
-end_inv[-1, ] -> end_inv
+actual_inv[-1, ] -> actual_inv
+colnames(actual_inv) <- actual_inv[1, ]
+actual_inv[-1, ] -> actual_inv
 
-end_inv %>% 
+actual_inv %>% 
   janitor::clean_names() %>% 
   readr::type_convert() %>% 
-  dplyr::select(-ship_loc_2) %>% 
-  dplyr::mutate(sku = gsub("-", "", sku),
-                end_month = as.Date(end_month, origin = "1899-12-30")) -> end_inv
+  dplyr::rename(sku = product_label_sku) %>% 
+  dplyr::mutate(sku = gsub("-", "", sku)) %>% 
+  tidyr::separate(calendar_month_year, c("month", "year")) %>% 
+  dplyr::mutate(month = recode(month, "Jan" = 1, "Feb" = 2, "Mar" = 3, "Apr" = 4, "May" = 5, "Jun" = 6, "Jul" = 7, "Aug" = 8, "Sep" = 9, "Oct" = 10, "Nov" = 11, "Dec" = 12)) %>% 
+  dplyr::mutate(date = paste0(year, "-", month, "-", 1),
+                date = as.Date(date)) %>% 
+  dplyr::mutate(ref = paste0(location, "_", sku, "_", date)) -> actual_inv
 
 
 ########################## Lag 0 
@@ -212,27 +212,145 @@ rm(dsx_lag_0, dsx_lag_1, dsx_lag_2)
 
 ################################################ dsx calculation part ################################################
 
-# Ending FG Inventory
 # ref
-
 dsx %>% 
   dplyr::mutate(ref = paste0(location_no, "_", product_label_sku_code, "_", forecast_per)) -> dsx
 
-end_inv %>% 
-  dplyr::mutate(ref = paste0(ship_loc, "_", sku, "_", end_month)) -> end_inv
+# AS - Ordered Quantity
+# AS - Origianl Ordered Quantity
+# AS - Actual Shipped
 
-end_inv %>% 
+actual_inv %>% 
   dplyr::group_by(ref) %>% 
-  dplyr::summarise(ending_fg_inv = sum(ending_inv)) -> end_inv_pivot
+  dplyr::summarise(as_ordered_quantity = sum(ordered_final_qty)) -> actual_inv_pivot_1
 
+actual_inv %>% 
+  dplyr::group_by(ref) %>% 
+  dplyr::summarise(as_original_ordered_quantity = sum(ordered_original_qty)) -> actual_inv_pivot_2
+
+actual_inv %>% 
+  dplyr::group_by(ref) %>% 
+  dplyr::summarise(actual = sum(cases)) -> actual_inv_pivot_3
 
 dsx %>% 
-  dplyr::left_join(end_inv_pivot) -> dsx
+  dplyr::left_join(actual_inv_pivot_1) %>% 
+  dplyr::left_join(actual_inv_pivot_2) %>% 
+  dplyr::left_join(actual_inv_pivot_3) -> dsx
 
-rm(end_inv)
+
+rm(actual_inv, actual_inv_pivot_1, actual_inv_pivot_2, actual_inv_pivot_3)
+
+
+# NA to 0 for all
+
+dsx %>% 
+  dplyr::mutate(adjusted_forecast_pounds_lbs = replace(adjusted_forecast_pounds_lbs, is.na(adjusted_forecast_pounds_lbs), 0),
+                adjusted_forecast_cases = replace(adjusted_forecast_cases, is.na(adjusted_forecast_cases), 0),
+                stat_forecast_pounds_lbs = replace(stat_forecast_pounds_lbs, is.na(stat_forecast_pounds_lbs), 0),
+                stat_forecast_cases = replace(stat_forecast_cases, is.na(stat_forecast_cases), 0),
+                as_ordered_quantity = replace(as_ordered_quantity, is.na(as_ordered_quantity), 0),
+                as_original_ordered_quantity = replace(as_original_ordered_quantity, is.na(as_original_ordered_quantity), 0),
+                actual = replace(actual, is.na(actual), 0)) -> dsx
+
+
+# Abs. Error (Actual)
+dsx %>% 
+  dplyr::mutate(abs_error_actual = abs(actual - adjusted_forecast_cases)) -> dsx
+
+
+# MAPE % (Actual)
+dsx %>% 
+  dplyr::mutate(mape_percent_actual = ifelse(abs_error_actual == 0, 0, abs_error_actual / actual),
+                mape_percent_actual = replace(mape_percent_actual, is.na(mape_percent_actual), 1)) -> dsx
+
+
+# Accuracy % (Actual)
+dsx %>% 
+  dplyr::mutate(accuracy_percent_actual = ifelse(mape_percent_actual > 1, 0, (1 - mape_percent_actual))) -> dsx
+
+
+# MAPE.Dec (Actual)
+dsx %>% 
+  dplyr::mutate(mape_dec_actual = mape_percent_actual * 100) -> dsx
+
+
+# Wgtd_Error (Actual)
+dsx %>% 
+  dplyr::mutate(wgtd_error_actual = mape_dec_actual * actual) -> dsx
 
 
 
+# Abs. Error (Final Order)
+dsx %>% 
+  dplyr::mutate(abs_error_final_order = abs(as_ordered_quantity - adjusted_forecast_cases)) -> dsx
+
+# MAPE % (Final Order)
+dsx %>% 
+  dplyr::mutate(mape_percent_final_order = ifelse(abs_error_final_order == 0, 0, abs_error_final_order / actual),
+                mape_percent_final_order = replace(mape_percent_final_order, is.na(mape_percent_final_order), 1)) -> dsx
+
+# Accuracy % (Final Order)
+dsx %>% 
+  dplyr::mutate(accuracy_percent_final_order = ifelse(mape_percent_final_order > 1, 0, (1 - mape_percent_final_order))) -> dsx
+
+
+# MAPE.Dec (Final Order)
+dsx %>% 
+  dplyr::mutate(mape_dec_final_order = mape_percent_final_order * 100) -> dsx
+
+# Wgtd_Error (Final Order)
+dsx %>% 
+  dplyr::mutate(wgtd_error_final_order = mape_dec_final_order * actual) -> dsx
+
+
+# Abs. Error (Original Order)
+dsx %>% 
+  dplyr::mutate(abs_error_original_order = abs(as_original_ordered_quantity - adjusted_forecast_cases)) -> dsx
+
+# MAPE % (Original Order)
+dsx %>% 
+  dplyr::mutate(mape_percent_original_order = ifelse(abs_error_original_order == 0, 0, abs_error_original_order / actual),
+                mape_percent_original_order = replace(mape_percent_original_order, is.na(mape_percent_original_order), 1)) -> dsx
+
+
+# Accuracy % (Original Order)
+dsx %>% 
+  dplyr::mutate(accuracy_percent_original_order = ifelse(mape_percent_original_order > 1, 0, (1 - mape_percent_original_order))) -> dsx
+
+# MAPE.Dec (Original Order)
+dsx %>% 
+  dplyr::mutate(mape_dec_original_order = mape_percent_original_order * 100) -> dsx
+
+
+# Wgtd_Error (Original Order)
+dsx %>% 
+  dplyr::mutate(wgtd_error_original_order = mape_dec_original_order * actual) -> dsx
+
+
+
+# Abs. Error (Original Order by Stat Forecast)
+dsx %>% 
+  dplyr::mutate(abs_error_original_order_by_stat_fc = abs(as_original_ordered_quantity - stat_forecast_cases)) -> dsx
+
+
+# MAPE % (Original Order by Stat Forecast)
+dsx %>% 
+  dplyr::mutate(mape_percent_original_order_by_stat_fc = ifelse(abs_error_original_order_by_stat_fc == 0, 0, abs_error_original_order_by_stat_fc / actual),
+                mape_percent_original_order_by_stat_fc = replace(mape_percent_original_order_by_stat_fc, is.na(mape_percent_original_order_by_stat_fc), 1)) -> dsx
+
+
+# Accuracy % (Original Order by Stat Forecast)
+dsx %>% 
+  dplyr::mutate(accuracy_percent_original_order_by_stat_fc = ifelse(mape_percent_original_order_by_stat_fc > 1, 0, (1 - mape_percent_original_order_by_stat_fc))) -> dsx
+
+# MAPE.Dec (Original Order by Stat Forecast)
+dsx %>% 
+  dplyr::mutate(mape_dec_original_order_by_stat_fc = mape_percent_original_order_by_stat_fc * 100) -> dsx
+
+
+# Wgtd_Error (Original Order by Stat Forecast)
+dsx %>% 
+  dplyr::mutate(wgtd_error_original_order_by_stat_fc = mape_dec_original_order_by_stat_fc * actual) -> dsx
 
 
 
