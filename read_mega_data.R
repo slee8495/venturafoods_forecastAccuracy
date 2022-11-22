@@ -16,4 +16,8 @@ mega_data <- read_excel("C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE
 
 
 
+mega_data %>% 
+  data.frame() -> mega_data
 
+save(mega_data, file = "mega_data.rds")
+load("mega_data.rds")
