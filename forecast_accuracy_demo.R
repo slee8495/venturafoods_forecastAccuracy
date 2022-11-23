@@ -29,8 +29,6 @@ actual_inv <- read_excel("C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SC
 ################################################ Original resources modify ################################################
 
 
-########################## Ending Inventory
-
 actual_inv[-1, ] -> actual_inv
 colnames(actual_inv) <- actual_inv[1, ]
 actual_inv[-1, ] -> actual_inv
@@ -98,6 +96,16 @@ dsx_lag_0 %>%
   dplyr::mutate(lag = "Lag 0") -> dsx_lag_0
 
 
+# Filter for current month
+dsx_lag_0 %>% 
+  dplyr::mutate(date_filter = lubridate::floor_date(Sys.Date(), unit = "month") -1,
+                date_filter = lubridate::floor_date(forecast_per,  unit = "month"),
+                date_filter_2 = ifelse(date_filter != forecast_month_year_code, "no", "yes")) %>% 
+  dplyr::filter(date_filter_2 == "yes") %>% 
+  dplyr::select(-date_filter, -date_filter_2) -> dsx_lag_0
+
+
+
 
 ########################## Lag 1
 
@@ -149,7 +157,13 @@ dsx_lag_1 %>%
   dplyr::mutate(lag = "Lag 1") -> dsx_lag_1
 
 
-
+# Filter for current month
+dsx_lag_1 %>% 
+  dplyr::mutate(date_filter = lubridate::floor_date(Sys.Date(), unit = "month") -1,
+                date_filter = lubridate::floor_date(forecast_per,  unit = "month"),
+                date_filter_2 = ifelse(date_filter != forecast_month_year_code, "no", "yes")) %>% 
+  dplyr::filter(date_filter_2 == "yes") %>% 
+  dplyr::select(-date_filter, -date_filter_2) -> dsx_lag_1
 
 ########################## Lag 2
 
@@ -200,7 +214,13 @@ dsx_lag_2 %>%
 dsx_lag_2 %>% 
   dplyr::mutate(lag = "Lag 2") -> dsx_lag_2
 
-
+# Filter for current month
+dsx_lag_2 %>% 
+  dplyr::mutate(date_filter = lubridate::floor_date(Sys.Date(), unit = "month") -1,
+                date_filter = lubridate::floor_date(forecast_per,  unit = "month"),
+                date_filter_2 = ifelse(date_filter != forecast_month_year_code, "no", "yes")) %>% 
+  dplyr::filter(date_filter_2 == "yes") %>% 
+  dplyr::select(-date_filter, -date_filter_2) -> dsx_lag_2
 
 
 ############# combine 3 files into dsx ###########
@@ -255,13 +275,16 @@ dsx %>%
 
 # Abs. Error (Actual)
 dsx %>% 
-  dplyr::mutate(abs_error_actual = abs(actual - adjusted_forecast_cases)) -> dsx
+  dplyr::mutate(abs_error_actual = abs(actual - adjusted_forecast_cases),
+                abs_error_actual = replace(abs_error_actual, is.na(abs_error_actual), 0)) -> dsx
 
 
 # MAPE % (Actual)
 dsx %>% 
   dplyr::mutate(mape_percent_actual = ifelse(abs_error_actual == 0, 0, abs_error_actual / actual),
-                mape_percent_actual = replace(mape_percent_actual, is.na(mape_percent_actual), 1)) -> dsx
+                mape_percent_actual = replace(mape_percent_actual, is.na(mape_percent_actual), 1),
+                mape_percent_actual = replace(mape_percent_actual, is.nan(mape_percent_actual), 1),
+                mape_percent_actual = replace(mape_percent_actual, is.infinite(mape_percent_actual), 1)) -> dsx
 
 
 # Accuracy % (Actual)
@@ -287,7 +310,9 @@ dsx %>%
 # MAPE % (Final Order)
 dsx %>% 
   dplyr::mutate(mape_percent_final_order = ifelse(abs_error_final_order == 0, 0, abs_error_final_order / actual),
-                mape_percent_final_order = replace(mape_percent_final_order, is.na(mape_percent_final_order), 1)) -> dsx
+                mape_percent_final_order = replace(mape_percent_final_order, is.na(mape_percent_final_order), 1),
+                mape_percent_final_order = replace(mape_percent_final_order, is.nan(mape_percent_final_order), 1),
+                mape_percent_final_order = replace(mape_percent_final_order, is.infinite(mape_percent_final_order), 1)) -> dsx
 
 # Accuracy % (Final Order)
 dsx %>% 
@@ -310,7 +335,9 @@ dsx %>%
 # MAPE % (Original Order)
 dsx %>% 
   dplyr::mutate(mape_percent_original_order = ifelse(abs_error_original_order == 0, 0, abs_error_original_order / actual),
-                mape_percent_original_order = replace(mape_percent_original_order, is.na(mape_percent_original_order), 1)) -> dsx
+                mape_percent_original_order = replace(mape_percent_original_order, is.na(mape_percent_original_order), 1),
+                mape_percent_original_order = replace(mape_percent_original_order, is.nan(mape_percent_original_order), 1),
+                mape_percent_original_order = replace(mape_percent_original_order, is.infinite(mape_percent_original_order), 1)) -> dsx
 
 
 # Accuracy % (Original Order)
@@ -336,7 +363,9 @@ dsx %>%
 # MAPE % (Original Order by Stat Forecast)
 dsx %>% 
   dplyr::mutate(mape_percent_original_order_by_stat_fc = ifelse(abs_error_original_order_by_stat_fc == 0, 0, abs_error_original_order_by_stat_fc / actual),
-                mape_percent_original_order_by_stat_fc = replace(mape_percent_original_order_by_stat_fc, is.na(mape_percent_original_order_by_stat_fc), 1)) -> dsx
+                mape_percent_original_order_by_stat_fc = replace(mape_percent_original_order_by_stat_fc, is.na(mape_percent_original_order_by_stat_fc), 1),
+                mape_percent_original_order_by_stat_fc = replace(mape_percent_original_order_by_stat_fc, is.nan(mape_percent_original_order_by_stat_fc), 1),
+                mape_percent_original_order_by_stat_fc = replace(mape_percent_original_order_by_stat_fc, is.infinite(mape_percent_original_order_by_stat_fc), 1)) -> dsx
 
 
 # Accuracy % (Original Order by Stat Forecast)
@@ -351,6 +380,10 @@ dsx %>%
 # Wgtd_Error (Original Order by Stat Forecast)
 dsx %>% 
   dplyr::mutate(wgtd_error_original_order_by_stat_fc = mape_dec_original_order_by_stat_fc * actual) -> dsx
+
+
+
+
 
 
 

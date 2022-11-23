@@ -21,3 +21,22 @@ mega_data %>%
 
 save(mega_data, file = "mega_data.rds")
 load("mega_data.rds")
+
+
+### modify mega_data
+# match with dsx
+# delete Oct to add my dsx from R
+
+# How to do this? 
+# dsx file into Excel (only first 10 cols)
+# mega data file into Excel (only first 10 cols)
+# compare.. and match these two
+
+colnames(mega_data) <- mega_data[1, ]
+mega_data[-1, ] -> mega_data
+
+mega_data %>% 
+  janitor::clean_names()
+
+
+
