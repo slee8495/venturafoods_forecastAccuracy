@@ -47,7 +47,7 @@ load("C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes/Projects/Forecast Accu
 
 DT::datatable(mega_data_by_r, 
               extensions = "Buttons",
-              options = list(pageLength = 10000, 
+              options = list(pageLength = 1000, 
                              scrollY= TRUE,
                              dom = "Blfrtip",
                              buttons = c("copy", "csv", "excel", "pdf")))
