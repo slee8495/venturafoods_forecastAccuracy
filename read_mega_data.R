@@ -25,7 +25,9 @@ load("mega_data.rds")
 colnames(mega_data) <- mega_data[1, ]
 mega_data[-1, ] -> mega_data
 
+
 mega_data %>% 
+  filter(!is.na(Type)) %>% 
   janitor::clean_names() %>% 
   dplyr::select(-type, -mfg_loc, -ship_loc, -product_platform, -abc_2, -sku_type,	-combined_label, -ending_fg_inv,
                 -concatenate,	-campus,	-work_days,	-canola_sku,	-scroll) %>% 
@@ -90,12 +92,15 @@ mega_data %>%
                   abs_error_original_order_by_stat_fc, mape_percent_original_order_by_stat_fc, accuracy_percent_original_order_by_stat_fc,
                   mape_dec_original_order_by_stat_fc,	wgtd_error_original_order_by_stat_fc) -> a
 
+ 
+# a %>% 
+#   filter(!(forecast_month_name == 10 & calendar_year == 2022)) -> b
+# 
+# 
+# rbind(b, dsx) -> mega_data_by_r
+
+#####################################################################################################
+
+# save(mega_data_by_r, file = "mega_data_by_r.rds")
 
 
-
-### modify mega_data
-# delete Oct to add my dsx from R
-# add these two together
-# new mega.rds
-
-# start working on the visual RMD file
