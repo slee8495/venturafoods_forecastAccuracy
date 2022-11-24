@@ -384,14 +384,14 @@ dsx %>%
 
 
 dsx %>% 
-  dplyr::select(-cust_ref_forecast_pounds_lbs, -cust_ref_forecast_cases, -ref) -> dsx
+  dplyr::select(-cust_ref_forecast_pounds_lbs, -cust_ref_forecast_cases, -ref, -forecast_month_year_code) -> dsx
 
 
 
 
 # re-arrange the columns
 dsx %>% 
-  dplyr::relocate(forecast_month_name, calendar_year, forcasted_month, forecast_per, lag, forecast_month_year_code,
+  dplyr::relocate(forecast_month_name, calendar_year, forcasted_month, forecast_per, lag,
                   product_manufacturing_location_code, product_manufacturing_location_name, location_no, location_name,
                   product_label_sku_code,	label, mto_mts,	mto_mts_gross_requirements_calc_method_id, product_label_sku_name,
                   product_category_name, product_platform_name,	product_group_code,	product_manufacturing_line_area_no_code, abc_4_id,

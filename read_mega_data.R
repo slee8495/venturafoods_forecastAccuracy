@@ -15,7 +15,7 @@ library(lubridate)
 #   data.frame() -> mega_data
 
 # save(mega_data, file = "mega_data.rds")
-load("mega_data.rds")
+load("C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes/Projects/Forecast Accuracy/venturafoods_forecastAccuracy/Mega Data/mega_data_by_excel_10.2022.rds")
 
 
 ###############################################
@@ -32,7 +32,7 @@ mega_data %>%
   dplyr::select(-type, -mfg_loc, -ship_loc, -product_platform, -abc_2, -sku_type,	-combined_label, -ending_fg_inv,
                 -concatenate,	-campus,	-work_days,	-canola_sku,	-scroll) %>% 
   readr::type_convert() %>% 
-  dplyr::mutate(forecast_month_name = recode(forecast_month_name, "Jan" = 1, "Feb" = 2, "Mar" = 3, "Apr" = 4, "May" = 5, "Jun" = 6, "Jul" = 7, "Aug" = 8, "Sep" = 9, "Oct" = 10, "Nov" = 11, "Dec" = 12)) %>% 
+  dplyr::mutate(forecast_month_name = recode(forecast_month_name, "Jan" = 1, "Feb" = 2, "Mar" = 3, "Apr" = 4, "May" = 5, "Jun" = 6, "Jul" = 7, "Aug" = 8, "Sep" = 9, "Oct" = 10, "Nov" = 11, "Dec" = 12, "JUne" = 6, "July" = 7)) %>% 
   dplyr::rename(product_manufacturing_location_name = mfg_location_city,
                 location_no = ship_location,
                 product_label_sku_code = product_sku,
@@ -80,7 +80,8 @@ mega_data %>%
                 accuracy_percent_original_order_by_stat_fc = "",
                 mape_dec_original_order_by_stat_fc = "",
                 wgtd_error_original_order_by_stat_fc = "") %>% 
-  dplyr::relocate(forecast_month_name, calendar_year, forcasted_month, forecast_per, lag, forecast_month_year_code,
+  dplyr::select(-forecast_month_year_code) %>% 
+  dplyr::relocate(forecast_month_name, calendar_year, forcasted_month, forecast_per, lag,
                   product_manufacturing_location_code, product_manufacturing_location_name, location_no, location_name,
                   product_label_sku_code,	label, mto_mts,	mto_mts_gross_requirements_calc_method_id, product_label_sku_name,
                   product_category_name, product_platform_name,	product_group_code,	product_manufacturing_line_area_no_code, abc_4_id,
@@ -96,6 +97,12 @@ mega_data %>%
 
 
 #####################################################################################################
+
+a %>% filter(!(forecast_month_name == 10 & calendar_year == 2022)) -> b
+
+
+
+rbind(b, dsx) -> mega_data_by_r
 
 # save(mega_data_by_r, file = "mega_data_by_r.rds")
 
