@@ -93,11 +93,7 @@ mega_data %>%
                   mape_dec_original_order_by_stat_fc,	wgtd_error_original_order_by_stat_fc) -> a
 
  
-# a %>% 
-#   filter(!(forecast_month_name == 10 & calendar_year == 2022)) -> b
-# 
-# 
-# rbind(b, dsx) -> mega_data_by_r
+
 
 #####################################################################################################
 

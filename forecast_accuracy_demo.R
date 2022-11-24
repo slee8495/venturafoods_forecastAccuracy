@@ -404,3 +404,19 @@ dsx %>%
                   mape_dec_original_order_by_stat_fc,	wgtd_error_original_order_by_stat_fc) -> dsx
 
 
+
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+
+# (Path Revision Needed)  bring previouse month mega_data ----
+load("C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes/Projects/Forecast Accuracy/venturafoods_forecastAccuracy/Mega Data/mega_data_by_r_10.2022.rds")
+
+# combind this month dsx result to mega_data
+rbind(mega_data_by_r, dsx) -> mega_data_by_r
+
+# (Path Revision Needed) save new mega_data ----
+save(mega_data_by_r, file = "C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes/Projects/Forecast Accuracy/venturafoods_forecastAccuracy/Mega Data/mega_data_by_r_10.2022.rds")
+
+
+

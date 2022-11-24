@@ -1,0 +1,68 @@
+---
+title: "Forecast Accuracy"
+runtime: shiny
+output: 
+  flexdashboard::flex_dashboard:
+  orientation: rows
+  vertical_layout: fill
+  source_code: embed
+  theme: cosmo
+
+---
+
+```{r setup, include=FALSE}
+
+#####Make sure you load any required packages.
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(magrittr)
+library(openxlsx)
+library(readxl)
+library(writexl)
+library(reshape2)
+library(skimr)
+library(janitor)
+library(lubridate)
+library(ggthemes)
+library(plotly)
+library(DT)
+library(rsconnect)
+
+
+```
+
+```{r, include=FALSE} 
+
+load("C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes/Projects/Forecast Accuracy/venturafoods_forecastAccuracy/Mega Data/mega_data_by_r_10.2022.rds")
+
+```
+
+# Data Table
+
+## Column {data-width="1000"}
+
+```{r}
+
+DT::datatable(mega_data_by_r, 
+              extensions = "Buttons",
+              options = list(pageLength = 10000, 
+                             scrollY= TRUE,
+                             dom = "Blfrtip",
+                             buttons = c("copy", "csv", "excel", "pdf")))
+
+
+```
+
+# Page 1
+======
+
+### Chart A *1. Histogram: distributions of winners by age.*
+
+
+```{r data_1, echo = FALSE}
+
+
+```
+
