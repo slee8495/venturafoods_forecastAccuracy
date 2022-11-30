@@ -387,7 +387,8 @@ dsx %>%
   dplyr::select(-cust_ref_forecast_pounds_lbs, -cust_ref_forecast_cases, -ref, -forecast_month_year_code) -> dsx
 
 
-
+dsx %>% 
+  dplyr::mutate(lag = recode(lag, "No Lag" = "Lag 0", "1 mo Lag" = "Lag 1", "1 Mo Lag" = "Lag 1", "2 mo Lag" = "Lag 2", "2 Mo Lag" = "Lag 2")) -> dsx
 
 # re-arrange the columns
 dsx %>% 
