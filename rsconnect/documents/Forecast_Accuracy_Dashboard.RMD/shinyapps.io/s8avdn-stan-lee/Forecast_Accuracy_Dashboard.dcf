@@ -5,11 +5,9 @@ account: s8avdn-stan-lee
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 7721857
-bundleId: 6550136
+bundleId: 6550175
 url: https://s8avdn-stan-lee.shinyapps.io/Forecast_Accuracy_Dashboard/
-when: 1669281601.80127
-lastSyncTime: 1669281601.80128
+when: 1669282886.60951
+lastSyncTime: 1669282886.60952
 asMultiple: FALSE
 asStatic: FALSE
-additionalFiles: mega_data_by_r_10.2022.rds
-ignoredFiles: Mega Data/mega_data_by_r_10.2022.rds
