@@ -7,6 +7,8 @@ library(reshape2)
 library(skimr)
 library(janitor)
 library(lubridate)
+library(rjson)
+library(jsonlite)
 
 ########################################### Original Resources Input ###############################################
 # (Path Revision Needed) dsx File read ----
@@ -421,3 +423,15 @@ save(mega_data_by_r, file = "C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes
 
 
 
+
+
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+
+
+# Convert to JSON File
+mega_data_by_r %>% 
+  dplyr::slice(1:10) -> json_test
+
+jsonlite::write_json(mega_data_by_r, "json_test_megadata_json")
