@@ -434,19 +434,15 @@ save(mega_data_by_r, file = "C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes
 ##########################################################################################################################################################
 
 
-mega_data_by_r %>% 
-  dplyr::slice(1:10) %>% 
-  dplyr::rename(mfg_code = product_manufacturing_location_code) -> rds_test
+# Next Section - Visualization data mining
 
-
-
-write.foreign(rds_test, "rds_test.txt", "rds_test.sas", package = "SAS")
+mega_data_by_r
 
 
 
 
-# way to do it? 
-# data convert to spark. 
-# and then spark to orc
+
+
+
 
 
