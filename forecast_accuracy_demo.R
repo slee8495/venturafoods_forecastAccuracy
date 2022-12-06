@@ -439,10 +439,10 @@ save(mega_data_by_r, file = "C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes
 mega_data_by_r
 
 
+# Now, What I'm going to try is JSON file with MS (if MicroStategy is still too slow to open, this plan will be given up)
 
 
 
-
-
-
+toJSON(mega_data_by_r) -> mega_data_by_r_json
+write_json(mega_data_by_r_json, "mega_data_json.json")
 
