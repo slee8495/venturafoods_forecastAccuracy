@@ -10,6 +10,9 @@ library(lubridate)
 library(rjson)
 library(jsonlite)
 library(sparklyr)
+library(foreign)
+
+
 
 ########################################### Original Resources Input ###############################################
 # (Path Revision Needed) dsx File read ----
@@ -431,13 +434,15 @@ save(mega_data_by_r, file = "C:/Users/slee/OneDrive - Ventura Foods/Stan/R Codes
 ##########################################################################################################################################################
 
 
-# Convert to JSON File
 mega_data_by_r %>% 
-  dplyr::slice(1:10) -> rds_test
+  dplyr::slice(1:10) %>% 
+  dplyr::rename(mfg_code = product_manufacturing_location_code) -> rds_test
 
 
-jsonlite::toJSON(rds_test) -> a
-jsonlite::toJSON(mega_data_by_r) -> aa
+
+write.foreign(rds_test, "rds_test.txt", "rds_test.sas", package = "SAS")
+
+
 
 
 # way to do it? 
