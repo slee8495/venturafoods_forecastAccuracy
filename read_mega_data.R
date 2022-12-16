@@ -112,5 +112,11 @@ rbind(b, dsx) -> mega_data_by_r
 mega_data_by_r %>% 
   dplyr::mutate(lag = recode(lag, "No Lag" = "Lag 0", "1 mo Lag" = "Lag 1", "1 Mo Lag" = "Lag 1", "2 mo Lag" = "Lag 2", "2 Mo Lag" = "Lag 2")) -> mega_data_by_r
 
+# mega data - sku duplicated data revise
+
+mega_data_by_r %>% 
+  dplyr::mutate(product_label_sku_code = gsub("-", "", product_label_sku_code)) -> mega_data_by_r
+
+
 save(mega_data_by_r, file = "mega_data_by_r_10.2022.rds")
 
