@@ -8,6 +8,7 @@ library(skimr)
 library(janitor)
 library(lubridate)
 
+
 # mega_data <- read_excel("C:/Users/slee/OneDrive - Ventura Foods/Ventura Work/SCE/Project/FY 23/Forecast Accuracy and Bias/Mega Data/mega_data_upto_oct_2022.xlsx")
 
 
@@ -119,4 +120,5 @@ mega_data_by_r %>%
 
 
 save(mega_data_by_r, file = "mega_data_by_r_10.2022.rds")
+
 
